@@ -77,6 +77,9 @@ class plgContentFacebookPostFeed extends JPlugin {
 					margin-top: 10px;
 					margin-right: 10px;
 				}
+				.datetime-right {
+					display: block;
+				}
 				@media (min-width: 992px) {
 					.datetime-right {
 						float: right;
@@ -109,12 +112,12 @@ class plgContentFacebookPostFeed extends JPlugin {
 				'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):""
 			), $template);
 		}
-		return sprintf('<div class="row">
+		return sprintf('<div class="container" style="width: 100%%;"><div class="row">
 			<h3>%s</h3>
 			<p>%s</p>
 		</div>
 		<div class="row"><div class="panel-group" id="accordion">%s</div>
-		</div>', $this->params->get('recent_events_heading'), $this->params->get('recent_events_description'), $RecentEventsHTML);
+		</div></div>', $this->params->get('recent_events_heading'), $this->params->get('recent_events_description'), $RecentEventsHTML);
 	}
 
 	/**
@@ -131,7 +134,7 @@ class plgContentFacebookPostFeed extends JPlugin {
 			$image = "";
 			// Add the image if a picture exists
 			if(array_key_exists('full_picture', $post)) {
-				$template = '<img src="{url}" alt="{message}" style="width: 100%%;"></img>';
+				$template = '<img src="{url}" alt="{message}" style="width: 100%;"></img>';
 				$image = $this->templateReplacement(array(
 					'url' => $post['full_picture'],
 					'message' => array_key_exists('message', $post)?$post['message']:""
@@ -161,37 +164,26 @@ class plgContentFacebookPostFeed extends JPlugin {
 			$RecentPostsHTML .= $this->templateReplacement(array(
 				'image' => $image,
 				'message' => $message,
-				'link' => array_key_exists('link', $post)?$post['link']:"",
+				'link' => array_key_exists('link', $post)?$post['link']:"#",
 				'likes' => array_key_exists('likes', $post)?count($post['likes']):0
 			), $template);
 		}
-		$JS = '
-			<script>
-			var prevHeight = 0;
-			var prevElement;
-			var i = 0;
-			$(".mxs-recent-facebook-post-body > .mxs-recent-facebook-post").each(function() {
-				if (i % 3 == 0) {
-					prevHeight = $(this).innerHeight();
-					prevElement = this;
-				} else {
-					var currHeight = $(this).innerHeight();
-					if (prevHeight > currHeight) {
-						$(this).innerHeight(prevHeight);
-					} else if (prevHeight < currHeight) {
-						$(prevElement).innerHeight(currHeight);
-					}
+		// CSS
+		$CSS = '<style>
+			@media (min-width: 992px) {
+				.mxs-recent-facebook-post {
+					height: 420px;
 				}
-				i++;
-			});</script>';
-		$template = '
-			{script}<div class="row">
+			}
+			</style>';
+		$template = '{CSS}<div class="container" style="width: 100%;">
+			<div class="row">
 				<h3>{heading}</h3>
 				<p>{description}</p>
 			</div>
-			<div class="row mxs-recent-facebook-post-body">{posts}</div>';
+			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>';
 		return $this->templateReplacement(array(
-			'script' => $JS,
+			'CSS' => $CSS,
 			'heading' => $this->params->get('recent_posts_heading'),
 			'description' => $this->params->get('recent_posts_description'),
 			'posts' => $RecentPostsHTML
@@ -234,6 +226,5 @@ class plgContentFacebookPostFeed extends JPlugin {
 		}
 		return $output;
 	}
-
 }
 ?>
