@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="content" method="upgrade">
+	<name>FacebookPostFeed</name>
+	<author>Max Schmitt</author>
+	<creationDate>28.12.2016</creationDate>
+	<copyright>Copyright (C) 2014 - 2017 Max Schmitt. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>max@schmitt.ovh</authorEmail>
+	<authorUrl>schmitt.ovh</authorUrl>
+	<version>1.1</version>
+	<description>This plugin shows an facebook posts feed on an normal joomla page.</description>
+	<files>
+		<filename plugin="FacebookPostFeed">FacebookPostFeed.php</filename>
+	</files>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="app_id" type="text" default="" description="APP Id of your developer console" label="APP Identification:" size="5" />
+				<field name="app_secret" type="text" default="" description="APP secret of your developer console" label="APP Secret:" size="5" />
+				<field name="recent_posts_heading" type="text" default="Recent posts heading" label="Enter the heading of the recent posts:" description="" filter="raw"/>
+				<field name="recent_posts_description" type="text" default="Recent posts description" label="Enter the description of the recent posts:" description="" filter="raw"/>
+				<field name="recent_posts_max_posts" type="number" default="10" label="Max amount of posts which posts should be shown:" description="" min="0" step="1" />
+				<field name="recent_events_heading" type="text" default="Recent events heading" label="Enter the heading of the recent events:" description="" filter="raw"/>
+				<field name="recent_events_description" type="text" default="Recent events description" label="Enter the description of the recent events:" description="" filter="raw"/>
+				<field name="recent_events_max_days" type="number" default="10" label="Days which should be shown in the past:" description="" min="0" step="1" />
+				<field name="recent_events_max_posts" type="number" default="60" label="Max shown posts:" description="" min="0" step="1" />
+			</fieldset>
+		</fields>
+	</config>
+</extension>
