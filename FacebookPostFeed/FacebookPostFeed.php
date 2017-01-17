@@ -159,7 +159,8 @@ class plgContentFacebookPostFeed extends JPlugin {
 						</p>
 					</div>
 				</div>
-			</div>';
+			</div>
+			<script>var maxHeight=0;document.getElementsByClassName("mxs-recent-facebook-post").forEach(function(element){maxHeight = maxHeight<element.scrollHeight?element.scrollHeight:maxHeight;});document.write("<style>.mxs-recent-facebook-post { min-height: "+maxHeight+"px !important; }</style>");</script>';
 			// Builds the PostEntry 
 			$RecentPostsHTML .= $this->templateReplacement(array(
 				'image' => $image,
