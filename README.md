@@ -1,8 +1,8 @@
-# What is this?
+## What is this?
 
 This is a pool of extensions by me which are used to allow for non profit usage. Feel free to use them on your website.
 
-# Installation
+## Installation
 
 - Download the full repository
 - Create a zip archive of the extensions what you want for example the FacebookPostFeed plugin
