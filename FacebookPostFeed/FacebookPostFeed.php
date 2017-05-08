@@ -2,75 +2,75 @@
 // no direct access
 defined( '_JEXEC' ) or die;
 
-class plgContentFacebookPostFeed extends JPlugin {
+class plgContentFacebookPostFeed extends JPlugin
+{
 
-	/**
-	 * Load the language file on instantiation. Note this is only available in Joomla 3.1 and higher.
-	 * If you want to support 3.0 series you must override the constructor
-	 *
-	 * @var    boolean
-	 * @since  3.1
-	 */
-	
-	
-	protected $autoloadLanguage = true;
-		
-	/**
-	 * Plugin method with the same name as the event will be called automatically.
-	 */
-	function onContentPrepare($context, &$article, &$params, $limitstart) {
+    /**
+     * Load the language file on instantiation. Note this is only available in Joomla 3.1 and higher.
+     * If you want to support 3.0 series you must override the constructor
+     *
+     * @var    boolean
+     * @since  3.1
+     */
+    
+    
+    protected $autoloadLanguage = true;
+        
+    /**
+     * Plugin method with the same name as the event will be called automatically.
+     */
+    function onContentPrepare($context, &$article, &$params, $limitstart)
+    {
 
-		if(preg_match('@{facebookPostFeed}(.*){/facebookPostFeed}@Us', $article->text, $matchPostFeed)) {
+        if (preg_match('@{facebookPostFeed}(.*){/facebookPostFeed}@Us', $article->text, $matchPostFeed)) {
+            $article->text = preg_replace(sprintf('@(<p>)?{facebookPostFeed}%s{/facebookPostFeed}(</p>)?@s', $matchPostFeed[1]), $this->getRecentPosts($matchPostFeed[1]), $article->text);
+        }
+        if (preg_match('@{facebookEventFeed}(.*){/facebookEventFeed}@Us', $article->text, $matchEventFeed)) {
+            $article->text = preg_replace(sprintf('@(<p>)?{facebookEventFeed}%s{/facebookEventFeed}(</p>)?@s', $matchEventFeed[1]), $this->getRecentEvents($matchEventFeed[1]), $article->text);
+        }
+        return true;
+    }
 
-			$article->text = preg_replace(sprintf('@(<p>)?{facebookPostFeed}%s{/facebookPostFeed}(</p>)?@s', $matchPostFeed[1]), $this->getRecentPosts($matchPostFeed[1]), $article->text);
-		
-		}
-		if(preg_match('@{facebookEventFeed}(.*){/facebookEventFeed}@Us', $article->text, $matchEventFeed)) {
-
-			$article->text = preg_replace(sprintf('@(<p>)?{facebookEventFeed}%s{/facebookEventFeed}(</p>)?@s', $matchEventFeed[1]), $this->getRecentEvents($matchEventFeed[1]), $article->text);
-		}
-		return true;
-	}
-
-	/**
-	 * getRecentEvents returns the HTML of the recent events
-	 */
-	private function getRecentEvents($PageId) {
-		// Fetches the data
-		$RecentEvents = $this->getGraphData(sprintf('/%s/events?fields=place,name,end_time,start_time,description', $PageId));
-		$RecentEventsHTML = "";
-		$now = new DateTime();
-		foreach ($RecentEvents['data'] as $key => $event) {
-			if ($key >= $this->params->get('recent_events_max_posts')) {
-				break;
-			}
-			$event_start_time = DateTime::createFromFormat(DateTime::ISO8601, $event['start_time']);
-			if (-$now->diff($event_start_time)->format("%r%a") > $this->params->get('recent_events_max_days')) {
-				continue;
-			}
-			$panelClass = 'panel-default';
-			$date = $event['start_time'];
-			if (array_key_exists('start_time', $event)) {
-				$event_start_time = DateTime::createFromFormat(DateTime::ISO8601, $event['start_time']);
-				$date = $event_start_time->format('d-m-Y H:i');
-				if (array_key_exists('end_time', $event)) {
-					$event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
-					$date = $event_start_time->format('d-m-Y H:i').' - '.$event_end_time->format('d-m-Y H:i');
-					$panelClass = $this->isDateBetweenDates($now, $event_start_time, $event_end_time)?'panel-success':$panelClass;
-				}
-			}
-			// $event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
-			$panelClass = 'panel-default';
-			//$date = isset($event_end_time)?$event_start_time->format('d-m-Y H:i').' - '.$event_end_time->format('d-m-Y H:i'):$event_start_time->format('d-m-Y H:i');
-			$location_x = "";
-			$location_y = "";
-			$location_name = "";
-			if (array_key_exists('place', $event) && array_key_exists('location', $event['place'])) {
-				$location_x = $event['place']['location']['latitude'];
-				$location_y = $event['place']['location']['longitude'];
-				$location_name = $event['place']['name'];
-			}
-			$CSS = '
+    /**
+     * getRecentEvents returns the HTML of the recent events
+     */
+    private function getRecentEvents($PageId)
+    {
+        // Fetches the data
+        $RecentEvents = $this->getGraphData(sprintf('/%s/events?fields=place,name,end_time,start_time,description', $PageId));
+        $RecentEventsHTML = "";
+        $now = new DateTime();
+        foreach ($RecentEvents['data'] as $key => $event) {
+            if ($key >= $this->params->get('recent_events_max_posts')) {
+                break;
+            }
+            $event_start_time = DateTime::createFromFormat(DateTime::ISO8601, $event['start_time']);
+            if (-$now->diff($event_start_time)->format("%r%a") > $this->params->get('recent_events_max_days')) {
+                continue;
+            }
+            $panelClass = 'panel-default';
+            $date = $event['start_time'];
+            if (array_key_exists('start_time', $event)) {
+                $event_start_time = DateTime::createFromFormat(DateTime::ISO8601, $event['start_time']);
+                $date = $event_start_time->format('d.m.Y H:i');
+                if (array_key_exists('end_time', $event)) {
+                    $event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
+                    $date = $event_start_time->format('d.m.Y H:i').' - '.$event_end_time->format('d.m.Y H:i');
+                    $panelClass = $this->isDateBetweenDates($now, $event_start_time, $event_end_time)?'panel-success':$panelClass;
+                }
+            }
+            // $event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
+            $panelClass = 'panel-default';
+            //$date = isset($event_end_time)?$event_start_time->format('d-m-Y H:i').' - '.$event_end_time->format('d-m-Y H:i'):$event_start_time->format('d-m-Y H:i');
+            $location_x = "";
+            $location_y = "";
+            $location_name = "";
+            if (array_key_exists('place', $event) && array_key_exists('location', $event['place'])) {
+                $location_x = $event['place']['location']['latitude'];
+                $location_y = $event['place']['location']['longitude'];
+                $location_name = $event['place']['name'];
+            }
+            $CSS = '
 			<style>
 				.fbdirect {
 					float: right;
@@ -86,7 +86,7 @@ class plgContentFacebookPostFeed extends JPlugin {
 					}
 				}
 			</style>';
-			$template = '{CSS}<div class="panel {panelClass}">
+            $template = '<div class="panel {panelClass}" style="margin-top: 5px;">
 				<div class="panel-heading">
 				<h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#accordion" href="#collapse{Id}">{eventName}</a>
@@ -100,53 +100,61 @@ class plgContentFacebookPostFeed extends JPlugin {
 				</div>
 				</div>
 			';
-			$RecentEventsHTML .= $this->templateReplacement(array(
-				'CSS' => $CSS,
-				'panelClass' => $panelClass,
-				'Id' => $key,
-				'eventName' => $event['name'],
-				'date' => $date,
-				'eventId' => $event['id'],
-				'locationX' => $location_x,
-				'locationY' => $location_y,
-				'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):""
-			), $template);
-		}
-		return sprintf('<div class="container" style="width: 100%%;"><div class="row">
-			<h3>%s</h3>
-			<p>%s</p>
-		</div>
-		<div class="row"><div class="panel-group" id="accordion">%s</div>
-		</div></div>', $this->params->get('recent_events_heading'), $this->params->get('recent_events_description'), $RecentEventsHTML);
-	}
+            $RecentEventsHTML .= $this->templateReplacement(array(
+                'panelClass' => $panelClass,
+                'Id' => $key,
+                'eventName' => $event['name'],
+                'date' => $date,
+                'eventId' => $event['id'],
+                'locationX' => $location_x,
+                'locationY' => $location_y,
+                'locationName' => $location_name,
+                'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):""
+            ), $template);
+        }
+        return $this->templateReplacement(array(
+                            'CSS' => $CSS,
+                            'eventsHeading' => $this->params->get('recent_events_heading'),
+                            'eventsDescription' => $this->params->get('recent_events_description'),
+                            'rawHTML' => $RecentEventsHTML,
+                             ), '{CSS}<div class="container" style="width: 100%;">
+							 		<div class="row">
+										<h3>{eventsHeading}</h3>
+										<p>{eventsDescription}</p>
+									</div>
+									<div class="row"><div class="panel-group" id="accordion">{rawHTML}</div>
+									</div>
+								</div>');
+    }
 
-	/**
-	 * getRecentPosts returns the HTML of the recent posts
-	 */
-	private function getRecentPosts($PageId) {
-		// Fetches the data
-		$RecentPosts = $this->getGraphData(sprintf('/%s/posts?fields=message,link,likes,full_picture', $PageId));
-		$RecentPostsHTML = "";
-		foreach ($RecentPosts['data'] as $key => $post) {
-			if ($key >= $this->params->get('recent_posts_max_posts')) {
-				break;
-			}
-			$image = "";
-			// Add the image if a picture exists
-			if(array_key_exists('full_picture', $post)) {
-				$template = '<img src="{url}" alt="{message}" style="width: 100%;"></img>';
-				$image = $this->templateReplacement(array(
-					'url' => $post['full_picture'],
-					'message' => array_key_exists('message', $post)?$post['message']:""
-				), $template);
-			}
-			// Check if the message is too long => short and add  "..." at the end
-			$message = array_key_exists('message', $post)?$post['message']:"";
-			if(strlen($message) > 195) {
-				$message = preg_replace('/\s+?(\S+)?$/', '', substr($post['message'], 0, 201))."...";
-			}
-			// Thumbnail template
-			$template = '
+    /**
+     * getRecentPosts returns the HTML of the recent posts
+     */
+    private function getRecentPosts($PageId)
+    {
+        // Fetches the data
+        $RecentPosts = $this->getGraphData(sprintf('/%s/posts?fields=message,link,likes,full_picture', $PageId));
+        $RecentPostsHTML = "";
+        foreach ($RecentPosts['data'] as $key => $post) {
+            if ($key >= $this->params->get('recent_posts_max_posts')) {
+                break;
+            }
+            $image = "";
+            // Add the image if a picture exists
+            if (array_key_exists('full_picture', $post)) {
+                $template = '<img src="{url}" alt="{message}" style="width: 100%;"></img>';
+                $image = $this->templateReplacement(array(
+                    'url' => $post['full_picture'],
+                    'message' => array_key_exists('message', $post)?$post['message']:""
+                ), $template);
+            }
+            // Check if the message is too long => short and add  "..." at the end
+            $message = array_key_exists('message', $post)?$post['message']:"";
+            if (strlen($message) > 195) {
+                $message = preg_replace('/\s+?(\S+)?$/', '', substr($post['message'], 0, 201))."...";
+            }
+            // Thumbnail template
+            $template = '
 			<div class="col-xs-12 col-md-4 mxs-recent-facebook-post">
 				<div class="thumbnail">
 					{image}
@@ -161,71 +169,73 @@ class plgContentFacebookPostFeed extends JPlugin {
 				</div>
 			</div>
 			<script>var maxHeight=0;document.getElementsByClassName("mxs-recent-facebook-post").forEach(function(element){maxHeight = maxHeight<element.scrollHeight?element.scrollHeight:maxHeight;});document.write("<style>.mxs-recent-facebook-post { min-height: "+maxHeight+"px !important; }</style>");</script>';
-			// Builds the PostEntry 
-			$RecentPostsHTML .= $this->templateReplacement(array(
-				'image' => $image,
-				'message' => $message,
-				'link' => array_key_exists('link', $post)?$post['link']:"#",
-				'likes' => array_key_exists('likes', $post)?count($post['likes']):0
-			), $template);
-		}
-		// CSS
-		$CSS = '<style>
+            // Builds the PostEntry
+            $RecentPostsHTML .= $this->templateReplacement(array(
+                'image' => $image,
+                'message' => $message,
+                'link' => array_key_exists('link', $post)?$post['link']:"#",
+                'likes' => array_key_exists('likes', $post)?count($post['likes']):0
+            ), $template);
+        }
+        // CSS
+        $CSS = '<style>
 			@media (min-width: 992px) {
 				.mxs-recent-facebook-post {
 					height: 420px;
 				}
 			}
 			</style>';
-		$template = '{CSS}<div class="container" style="width: 100%;">
+        $template = '{CSS}<div class="container" style="width: 100%;">
 			<div class="row">
 				<h3>{heading}</h3>
 				<p>{description}</p>
 			</div>
 			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>';
-		return $this->templateReplacement(array(
-			'CSS' => $CSS,
-			'heading' => $this->params->get('recent_posts_heading'),
-			'description' => $this->params->get('recent_posts_description'),
-			'posts' => $RecentPostsHTML
-		), $template);
-	}
+        return $this->templateReplacement(array(
+            'CSS' => $CSS,
+            'heading' => $this->params->get('recent_posts_heading'),
+            'description' => $this->params->get('recent_posts_description'),
+            'posts' => $RecentPostsHTML
+        ), $template);
+    }
 
-	/**
-	 * getGraphData is a helper function for getting the facebook graph data
-	 */
-	private function getGraphData($path) {
-			// builds the url
-			$ch = curl_init(sprintf("https://graph.facebook.com%s", $path));
-			// adds the authentification header
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array(sprintf("Authorization: OAuth %s|%s", $this->params->get('app_id'), $this->params->get('app_secret')))); 
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			// execute the session
-			$curl_response = curl_exec($ch);
-			// finish off the session
-			curl_close($ch);
-			// returns the nice json
-			return json_decode($curl_response, true);
-	}
+    /**
+     * getGraphData is a helper function for getting the facebook graph data
+     */
+    private function getGraphData($path)
+    {
+            // builds the url
+            $ch = curl_init(sprintf("https://graph.facebook.com%s", $path));
+            // adds the authentification header
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(sprintf("Authorization: OAuth %s|%s", $this->params->get('app_id'), $this->params->get('app_secret'))));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            // execute the session
+            $curl_response = curl_exec($ch);
+            // finish off the session
+            curl_close($ch);
+            // returns the nice json
+            return json_decode($curl_response, true);
+    }
 
 
-	/**
-	 * isDateBetweenDates is a helper function for getting a boolen if a date is between 2 other dates
-	 */
-    private function isDateBetweenDates(DateTime $today_timestamp, DateTime $start_timestamp, DateTime $end_timestamp) {
+    /**
+     * isDateBetweenDates is a helper function for getting a boolen if a date is between 2 other dates
+     */
+    private function isDateBetweenDates(DateTime $today_timestamp, DateTime $start_timestamp, DateTime $end_timestamp)
+    {
          return (($today_timestamp >= $start_timestamp) && ($today_timestamp <= $end_timestamp));
     }
-	
-	/**
-	 * templateReplacement is a helper function to inprove the readablity of the templating code
-	 */
-	private function templateReplacement(Array $values, string $template) {
-		$output = $template;
-		foreach ($values as $key => $value) {
-			$output = str_replace(sprintf('{%s}', $key), $value, $output);
-		}
-		return $output;
-	}
+    
+    /**
+     * templateReplacement is a helper function to inprove the readablity of the templating code
+     */
+    private function templateReplacement(array $values, string $template)
+    {
+        $output = $template;
+        foreach ($values as $key => $value) {
+            $output = str_replace(sprintf('{%s}', $key), $value, $output);
+        }
+        return $output;
+    }
 }
-?>
