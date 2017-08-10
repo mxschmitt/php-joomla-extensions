@@ -108,7 +108,7 @@ class plgContentFacebookPostFeed extends JPlugin
                 'eventId' => $event['id'],
                 'locationX' => $location_x,
                 'locationY' => $location_y,
-                'locationName' => $location_name,
+                'locationName' => htmlspecialchars($location_name),
                 'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):""
             ), $template);
         }
@@ -142,10 +142,10 @@ class plgContentFacebookPostFeed extends JPlugin
             $image = "";
             // Add the image if a picture exists
             if (array_key_exists('full_picture', $post)) {
-                $template = '<img src="{url}" alt="{message}" style="width: 100%;"></img>';
+                $template = '<img src="{url}" alt="{message}" style="width: 100%;">';
                 $image = $this->templateReplacement(array(
                     'url' => $post['full_picture'],
-                    'message' => array_key_exists('message', $post)?$post['message']:""
+                    'message' => array_key_exists('message', $post)?htmlspecialchars($post['message']):""
                 ), $template);
             }
             // Check if the message is too long => short and add  "..." at the end
@@ -167,8 +167,7 @@ class plgContentFacebookPostFeed extends JPlugin
 						</p>
 					</div>
 				</div>
-			</div>
-			<script>var maxHeight=0;document.getElementsByClassName("mxs-recent-facebook-post").forEach(function(element){maxHeight = maxHeight<element.scrollHeight?element.scrollHeight:maxHeight;});document.write("<style>.mxs-recent-facebook-post { min-height: "+maxHeight+"px !important; }</style>");</script>';
+			</div>';
             // Builds the PostEntry
             $RecentPostsHTML .= $this->templateReplacement(array(
                 'image' => $image,
@@ -190,7 +189,15 @@ class plgContentFacebookPostFeed extends JPlugin
 				<h3>{heading}</h3>
 				<p>{description}</p>
 			</div>
-			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>';
+			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>
+			<script>
+            var maxHeight = 0,
+                el = document.getElementsByClassName("mxs-recent-facebook-post");
+            for (var i = 0; i < el.length; i++) {
+            maxHeight = maxHeight < el[i].scrollHeight ? el[i].scrollHeight : maxHeight;
+            }
+            document.write("<style>.mxs-recent-facebook-post { min-height: " + maxHeight + "px !important; }</style>");
+            </script>';
         return $this->templateReplacement(array(
             'CSS' => $CSS,
             'heading' => $this->params->get('recent_posts_heading'),
