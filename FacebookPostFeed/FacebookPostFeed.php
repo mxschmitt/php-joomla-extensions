@@ -190,13 +190,24 @@ class plgContentFacebookPostFeed extends JPlugin
 				<p>{description}</p>
 			</div>
 			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
 			<script>
-            var maxHeight = 0,
-                el = document.getElementsByClassName("mxs-recent-facebook-post");
-            for (var i = 0; i < el.length; i++) {
-            maxHeight = maxHeight < el[i].scrollHeight ? el[i].scrollHeight : maxHeight;
-            }
-            document.write("<style>.mxs-recent-facebook-post { min-height: " + maxHeight + "px !important; }</style>");
+            $(window).on("load", function () {
+                var minHeight = 0,
+                    items = el = document.getElementsByClassName("mxs-recent-facebook-post"),
+                    currentStore = [];
+                for (var i = 0; i < el.length; i++) {
+                    minHeight = minHeight < el[i].scrollHeight ? el[i].scrollHeight : minHeight;
+                    currentStore.push(items[i]);
+                    if ((i + 1) % 3 === 0 && i !== 0) {
+                        for (var j = 0; j < currentStore.length; j++) {
+                            currentStore[j].style.minHeight = minHeight.toString() + "px";
+                        }
+                        currentStore = [];
+                        maxHeight = 0;
+                    }
+                }
+            });
             </script>';
         return $this->templateReplacement(array(
             'CSS' => $CSS,
