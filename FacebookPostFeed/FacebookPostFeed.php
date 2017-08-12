@@ -192,19 +192,25 @@ class plgContentFacebookPostFeed extends JPlugin
 			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
 			<script>
-            $(window).on("load", function () {
-                var minHeight = 0,
-                    items = el = document.getElementsByClassName("mxs-recent-facebook-post"),
-                    currentStore = [];
-                for (var i = 0; i < el.length; i++) {
-                    minHeight = minHeight < el[i].scrollHeight ? el[i].scrollHeight : minHeight;
-                    currentStore.push(items[i]);
-                    if ((i + 1) % 3 === 0 && i !== 0) {
-                        for (var j = 0; j < currentStore.length; j++) {
-                            currentStore[j].style.minHeight = minHeight.toString() + "px";
-                        }
+            $(window).on("load resize", function () {
+                var el = items = el = document.getElementsByClassName("mxs-recent-facebook-post");
+                if (window.innerWidth > 991) {
+                    var minHeight = 0,
                         currentStore = [];
-                        maxHeight = 0;
+                    for (var i = 0; i < el.length; i++) {
+                        minHeight = minHeight < el[i].scrollHeight ? el[i].scrollHeight : minHeight;
+                        currentStore.push(items[i]);
+                        if ((i + 1) % 3 === 0 && i !== 0) {
+                            for (var j = 0; j < currentStore.length; j++) {
+                                currentStore[j].style.minHeight = minHeight.toString() + "px";
+                            }
+                            currentStore = [];
+                            minHeight = 0;
+                        }
+                    }
+                } else {
+                    for (var i = 0; i < el.length; i++) {
+                        el[i].style.minHeight = null;
                     }
                 }
             });
