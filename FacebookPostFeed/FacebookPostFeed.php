@@ -48,6 +48,7 @@ class plgContentFacebookPostFeed extends JPlugin
             if (-$now->diff($event_start_time)->format("%r%a") > $this->params->get('recent_events_max_days')) {
                 continue;
             }
+            $collapse = false;
             $panelClass = 'panel-default';
             $date = $event['start_time'];
             if (array_key_exists('start_time', $event)) {
@@ -56,11 +57,14 @@ class plgContentFacebookPostFeed extends JPlugin
                 if (array_key_exists('end_time', $event)) {
                     $event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
                     $date = $event_start_time->format('d.m.Y H:i').' - '.$event_end_time->format('d.m.Y H:i');
-                    $panelClass = $this->isDateBetweenDates($now, $event_start_time, $event_end_time)?'panel-success':$panelClass;
+                    if ($this->isDateBetweenDates($now, $event_start_time, $event_end_time)) {
+                        $panelClass = 'panel-success';
+                        $collapse = true;
+                    }
                 }
             }
             // $event_end_time = DateTime::createFromFormat(DateTime::ISO8601, $event['end_time']);
-            $panelClass = 'panel-default';
+            // $panelClass = 'panel-default';
             //$date = isset($event_end_time)?$event_start_time->format('d-m-Y H:i').' - '.$event_end_time->format('d-m-Y H:i'):$event_start_time->format('d-m-Y H:i');
             $location_x = "";
             $location_y = "";
@@ -93,7 +97,7 @@ class plgContentFacebookPostFeed extends JPlugin
 					<strong class="datetime-right">{date}</strong>
 				</h4>
 				</div>
-				<div id="collapse{Id}" class="panel-collapse collapse">
+				<div id="collapse{Id}" class="panel-collapse collapse{additionalClassCollapse}">
 					<a href="https://www.facebook.com/events/{eventId}" class="fbdirect" target="_blank"><i class="btn btn-default btn-small fa fa-calendar"> Zum Event</i></a>
 					<a href="https://www.google.de/maps/search/{locationX}+{locationY}" title="{locationName}" target="_blank" class="fbdirect"><i class="btn btn-danger btn-sm fa fa-map-marker"></i></a>
 					<div class="panel-body">{eventDescription}</div>
@@ -109,7 +113,8 @@ class plgContentFacebookPostFeed extends JPlugin
                 'locationX' => $location_x,
                 'locationY' => $location_y,
                 'locationName' => htmlspecialchars($location_name),
-                'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):""
+                'eventDescription' => array_key_exists('description', $event)?nl2br($event['description']):"",
+                'additionalClassCollapse' => $collapse?" show":""
             ), $template);
         }
         return $this->templateReplacement(array(
