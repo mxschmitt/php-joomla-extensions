@@ -195,31 +195,33 @@ class plgContentFacebookPostFeed extends JPlugin
 				<p>{description}</p>
 			</div>
 			<div class="row mxs-recent-facebook-post-body">{posts}</div></div>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+			<script data-cfasync="false" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js"></script>
 			<script>
-            $(window).on("load resize", function () {
-                var el = items = el = document.getElementsByClassName("mxs-recent-facebook-post");
-                if (window.innerWidth > 991) {
-                    var minHeight = 0,
-                        currentStore = [];
-                    for (var i = 0; i < el.length; i++) {
-                        minHeight = minHeight < el[i].scrollHeight ? el[i].scrollHeight : minHeight;
-                        currentStore.push(items[i]);
-                        if ((i + 1) % 3 === 0 && i !== 0) {
-                            for (var j = 0; j < currentStore.length; j++) {
-                                currentStore[j].style.minHeight = minHeight.toString() + "px";
-                            }
+                var fixHeight = function() {
+                    var el = items = el = document.getElementsByClassName("mxs-recent-facebook-post");
+                    if (window.innerWidth > 991) {
+                        var minHeight = 0,
                             currentStore = [];
-                            minHeight = 0;
+                        for (var i = 0; i < el.length; i++) {
+                            minHeight = minHeight < el[i].scrollHeight ? el[i].scrollHeight : minHeight;
+                            currentStore.push(items[i]);
+                            if ((i + 1) % 3 === 0 && i !== 0) {
+                                for (var j = 0; j < currentStore.length; j++) {
+                                    currentStore[j].style.minHeight = minHeight.toString() + "px";
+                                }
+                                currentStore = [];
+                                minHeight = 0;
+                            }
+                        }
+                    } else {
+                        for (var i = 0; i < el.length; i++) {
+                            el[i].style.minHeight = null;
                         }
                     }
-                } else {
-                    for (var i = 0; i < el.length; i++) {
-                        el[i].style.minHeight = null;
-                    }
-                }
-            });
-            </script>';
+	         }
+$(document).ready(fixHeight)
+$(document).resize(fixHeight)
+</script>';
         return $this->templateReplacement(array(
             'CSS' => $CSS,
             'heading' => $this->params->get('recent_posts_heading'),
